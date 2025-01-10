@@ -41,6 +41,21 @@ display_help() {
 }
 
 
+
+
+# Install requirements of the sub command
+# This function is intended to be used from $CURRENT_CLI with $CURRENT_CLI $command init_command
+# (it will only work is init_command is available as an argument with the others options)
+# Usage: $CURRENT_CLI $command init_command
+init_command() {
+	
+	# Nothing to init
+	exit
+}
+
+
+
+
 echo "Have you ever seen a P carrying a B ?  "
 $HELPER loading_process "sleep 1.3"
 
@@ -55,6 +70,14 @@ $HELPER loading_process "sleep 1.3"
 &&	echo "    ''''|| |		" \
 &&	echo "         \\\|		" \
 &&	echo ""
+
+
+
+
+
+if [ ! -z "$2" ]; then
+	display_help
+fi
 
 
 
