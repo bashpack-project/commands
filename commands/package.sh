@@ -274,6 +274,7 @@ get_next_update_packages_date() {
 
 if [ ! -z "$2" ]; then
 	case "$2" in
+		init_command)	init_command ;;
 		install)
 			if [ -z "$4" ]; then
 				install_confirmation="no" && install_package "$3"
