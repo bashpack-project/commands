@@ -35,6 +35,10 @@ question_accept_install="Do you want to automatically accept installations durin
 
 
 
+# Create automation that will automatically update the system
+$HELPER create_automation "$1 update -y"
+
+
 
 # Display help
 # Usage: display_help
