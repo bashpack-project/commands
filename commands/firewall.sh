@@ -63,7 +63,7 @@ display_help() {
 
 
 
-# Install requirements of the sub command
+# Install requirements of the subcommand
 # This function is intended to be used from $CURRENT_CLI with $CURRENT_CLI $command init_command
 # (it will only work is init_command is available as an argument with the others options)
 # Usage: $CURRENT_CLI $command init_command

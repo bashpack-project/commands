@@ -35,11 +35,6 @@ question_accept_install="Do you want to automatically accept installations durin
 
 
 
-# Create automation that will automatically update the system
-$HELPER create_automation "$1 update -y"
-
-
-
 # Display help
 # Usage: display_help
 display_help() {
@@ -64,6 +59,20 @@ display_help() {
 	echo ""
 	echo "$NAME $VERSION"
 }
+
+
+
+
+# Install requirements of the subcommand
+# This function is intended to be used from $CURRENT_CLI with $CURRENT_CLI $command init_command
+# (it will only work is init_command is available as an argument with the others options)
+# Usage: $CURRENT_CLI $command init_command
+init_command() {
+
+	# Create automation that will automatically update the system
+	$HELPER create_automation "$1 update -y"
+}
+
 
 
 
