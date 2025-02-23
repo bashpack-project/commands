@@ -25,6 +25,7 @@
 
 
 export allow_helper_functions="true"
+# command_name=$(echo $(basename $1))
 
 
 

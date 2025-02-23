@@ -25,10 +25,10 @@
 
 
 export allow_helper_functions="true"
+command_name=$(echo $(basename $1))
 
 
-# command_name=$(echo $(basename $1))
-# file_log="$dir_log/$CURRENT_SUBCOMMAND.log"
+file_log="$dir_log/$command_name.log"
 
 
 question_accept_install="Do you want to automatically accept installations during the process? [y/N] "
@@ -38,26 +38,24 @@ question_accept_install="Do you want to automatically accept installations durin
 # Display help
 # Usage: display_help
 display_help() {
-	echo "$USAGE"
-	echo ""
-	echo "Supported package managers:"
-	echo " - APT (https://wiki.debian.org/Apt)"
-	echo " - DNF (https://rpm-software-management.github.io/)"
-	echo " - YUM (http://yum.baseurl.org/)"
-	echo " - Canonical Snapcraft (https://snapcraft.io)"
-	echo " - Firmwares with fwupd (https://github.com/fwupd/fwupd)"
-	echo ""
-	echo "Arguments:"
-	echo " install"
-	echo " update"
-	echo ""
-	echo "Options:"
-	echo " -y, --assume-yes 	enable automatic installations without asking during the execution."
-	echo "     --ask    		ask to manually write your choice about updates installations confirmations."
-	echo "     --get-logs		display logs."
-	echo "     --when   		display next update cycle."
-	echo ""
-	echo "$NAME $VERSION"
+	echo " \
+		Supported package managers:
+		- APT (https://wiki.debian.org/Apt)
+		- DNF (https://rpm-software-management.github.io/)
+		- YUM (http://yum.baseurl.org/)
+		- Canonical Snapcraft (https://snapcraft.io)
+		- Firmwares with fwupd (https://github.com/fwupd/fwupd)
+		
+		Arguments:
+		install
+		update
+		
+		Options:
+		-y, --assume-yes 	enable automatic installations without asking during the execution.
+			--ask    		ask to manually write your choice about updates installations confirmations.
+			--get-logs		display logs.
+			--when   		display next update cycle.
+	" | sed 's/^[ \t]*//'
 }
 
 
@@ -70,7 +68,9 @@ display_help() {
 init_command() {
 
 	# Create automation that will automatically update the system
-	$HELPER create_automation "$1 update -y"
+	# $HELPER create_automation "$1 update -y"
+	# $HELPER create_automation "$(basename $0) update -y"
+	$HELPER create_automation "package update -y"
 }
 
 
@@ -115,7 +115,7 @@ install_package() {
 
 		# Test every supported package managers until finding a compatible
 		if [ "$($HELPER exists_command apt)" = "exists" ]; then
-			apt install $install_confirmation $package | $HELPER append_log "$file_LOG_CURRENT_SUBCOMMAND"
+			apt install $install_confirmation $package | $HELPER append_log "$file_log_command"
 			manager="apt"
 
 		elif [ "$($HELPER exists_command dnf)" = "exists" ]; then
@@ -153,21 +153,21 @@ update_packages() {
 
 	if [ "$($HELPER exists_command "apt")" = "exists" ]; then
 
-		$HELPER display_info "updating with APT." "$file_LOG_CURRENT_SUBCOMMAND"
+		$HELPER display_info "updating with APT." "$file_log_command"
 
 		if [ "$($HELPER exists_command "dpkg")" = "exists" ]; then
-			dpkg --configure -a										| $HELPER append_log $file_LOG_CURRENT_SUBCOMMAND
+			dpkg --configure -a										| $HELPER append_log $file_log_command
 		fi
 
-		apt update													| $HELPER append_log "$file_LOG_CURRENT_SUBCOMMAND"
-		apt install --fix-broken $install_confirmation				| $HELPER append_log "$file_LOG_CURRENT_SUBCOMMAND"
-		apt full-upgrade $install_confirmation						| $HELPER append_log "$file_LOG_CURRENT_SUBCOMMAND"
+		apt update													| $HELPER append_log "$file_log_command"
+		apt install --fix-broken $install_confirmation				| $HELPER append_log "$file_log_command"
+		apt full-upgrade $install_confirmation						| $HELPER append_log "$file_log_command"
 		
 		# Ensure to delete all old packages & their configurations
-		apt autopurge $install_confirmation							| $HELPER append_log "$file_LOG_CURRENT_SUBCOMMAND"
+		apt autopurge $install_confirmation							| $HELPER append_log "$file_log_command"
 		
 		# Just repeat to check if everything is ok
-		apt full-upgrade $install_confirmation						| $HELPER append_log "$file_LOG_CURRENT_SUBCOMMAND"
+		apt full-upgrade $install_confirmation						| $HELPER append_log "$file_log_command"
 	fi
 
 
@@ -203,7 +203,7 @@ update_packages() {
 	}
 
 	if [ "$($HELPER exists_command "snap")" = "exists" ]; then
-		$HELPER display_info "updating with Snap." "$file_LOG_CURRENT_SUBCOMMAND"
+		$HELPER display_info "updating with Snap." "$file_log_command"
 		# upgrade_with_snapcraft $install_confirmation
 		upgrade_with_snapcraft $install_confirmation
 	fi
@@ -213,14 +213,14 @@ update_packages() {
 
 	# Update DNF packages (using YUM as fallback if DNF doesn't exist)
 	if [ "$($HELPER exists_command "dnf")" = "exists" ]; then
-		$HELPER display_info "updating with DNF." "$file_LOG_CURRENT_SUBCOMMAND"
+		$HELPER display_info "updating with DNF." "$file_log_command"
 
 		# dnf upgrade $install_confirmation
 		dnf upgrade $install_confirmation
 
 
 	elif [ "$($HELPER exists_command "yum")" = "exists" ]; then
-		$HELPER display_info "updating with YUM." "$file_LOG_CURRENT_SUBCOMMAND"
+		$HELPER display_info "updating with YUM." "$file_log_command"
 
 		# yum upgrade $install_confirmation
 		yum upgrade $install_confirmation
@@ -296,7 +296,7 @@ if [ ! -z "$2" ]; then
 				esac
 			fi
 			;;
-		--get-logs)	$HELPER get_logs $file_LOG_CURRENT_SUBCOMMAND ;; 
+		--get-logs)	$HELPER get_logs $file_log_command ;; 
 		--help)		display_help ;;
 		*)			$HELPER display_error "unknown option '$2' from '$1' command."'\n'"$USAGE" && exit ;;
 	esac
