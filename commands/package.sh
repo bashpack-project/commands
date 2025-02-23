@@ -68,9 +68,8 @@ display_help() {
 init_command() {
 
 	# Create automation that will automatically update the system
-	# $HELPER create_automation "$1 update -y"
-	# $HELPER create_automation "$(basename $0) update -y"
 	$HELPER create_automation "package update -y"
+	$HELPER create_completion $command_name
 }
 
 

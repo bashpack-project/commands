@@ -68,6 +68,8 @@ display_help() {
 # Usage: $CURRENT_CLI $command init_command
 init_command() {
 
+	$HELPER create_completion $command_name
+
 	# Create option in the main config file to enable automatic firewall management
 	if [ -z "$(cat $file_config | grep "\[command\] $command_name")" ]; then
 		echo "
