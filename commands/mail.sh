@@ -18,7 +18,7 @@ display_help() {
 		-o, --oneshot <server> <port> <source address> <source password> <destination address> <object> <content>    send a single oneshot mail.
 
 		Example:
-		$NAME_ALIAS mail -o smtps://mail.server.com 465 username@sender.com vEryStr0ngP4SsW0rd desination@destination.com 'notification of the day' 'content of the mail'
+		$NAME_ALIAS mail -o 'smtps://mail.server.com' '465' 'username@sender.com' 'vEryStr0ngP4SsW0rd' 'desination@destination.com' 'notification of the day' 'content of the mail'
 		
 	" | sed 's/^[ \t]*//'
 
@@ -102,7 +102,7 @@ install_automation() {
 	local mail_object="$6"
 	local mail_content="$7"
 
-	$HELPER create_automation "$command_name -o $server $port $source_address $source_password $destination_address '$mail_object' '$mail_content'"
+	$HELPER create_automation "$command_name -o '$server' '$port' '$source_address' '$source_password' '$destination_address' '$mail_object' '$mail_content'"
 }
 
 
