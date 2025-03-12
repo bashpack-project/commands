@@ -12,13 +12,15 @@ command_name=$(echo $(basename $1))
 display_help() {
 	echo " \
 		Send a mail from command line.
+		This command will send a mail according to the content stored in in the file '/tmp/$NAME_LOWERCASE-mail-content'.
+		WARNING: this file will be deleted after the mail has been sent.
 
 		Options: 
-		-i, --install <server> <port> <source address> <source password> <destination address> <object> <content>    create automation to send mail on regular basis.
-		-o, --oneshot <server> <port> <source address> <source password> <destination address> <object> <content>    send a single oneshot mail.
+		-i, --install <server> <port> <source address> <source password> <destination address> <object>    create automation to send mail on regular basis.
+		-o, --oneshot <server> <port> <source address> <source password> <destination address> <object>    send a single oneshot mail.
 
 		Example:
-		$NAME_ALIAS mail -o 'smtps://mail.server.com' '465' 'username@sender.com' 'vEryStr0ngP4SsW0rd' 'desination@destination.com' 'notification of the day' 'content of the mail'
+		$NAME_ALIAS mail -o 'smtps://mail.server.com' '465' 'username@sender.com' 'vEryStr0ngP4SsW0rd' 'destination@destination.com' 'notification of the day'
 		
 	" | sed 's/^[ \t]*//'
 
@@ -42,40 +44,42 @@ init_command() {
 
 
 # Send a mail
-# Usage: send_mail <server> <port> <source address> <source password> <destination address> <object> <content>
+# Usage: send_mail <server> <port> <source address> <source password> <destination address> <object>
 send_mail() {
 
 	if [ "$($HELPER exists_command "curl")" = "exists" ]; then
 
 		local server="$1"
 		local port="$2"
-
 		local source_address="$3"
 		local source_password="$4"
-
 		local destination_address="$5"
-
 		local mail_object="$6"
-		local mail_content="$7"
 
 
 		# Curl must use a file to send a valid mail
-		local file_mail_tmp="/tmp/$NAME_LOWERCASE-mail-header"
+		local file_mail_tmp="/tmp/$NAME_LOWERCASE-mail"
+		local file_mail_content_tmp="/tmp/$NAME_LOWERCASE-mail-content"
 
 
 
 		if [ "$(echo $server | grep 'smtp' | grep '://')" ] && [ $port != "" ] && [ $source_address != "" ] && [ $source_password != "" ] && [ $destination_address != "" ]; then
 
-			echo "From: $source_address\nTo: $destination_address\nSubject: $mail_object\n\n$mail_content" > $file_mail_tmp
+			echo "From: $source_address"			> $file_mail_tmp
+			echo "To: $destination_address"			>> $file_mail_tmp
+			echo "Subject: $mail_object"			>> $file_mail_tmp
+			echo "\n"								>> $file_mail_tmp
+			cat "$file_mail_content_tmp"			>> $file_mail_tmp
 
 			curl -s --url "$server:$port" --ssl-reqd \
 				--mail-from "$source_address" \
 				--mail-rcpt "$destination_address" \
 				--user "$source_address:$source_password" \
-				-T $file_mail_tmp
+				--upload-file $file_mail_tmp
 
 			# Delete tmp content file
 			rm -rf $file_mail_tmp
+			rm -rf $file_mail_content_tmp
 
 		else
 			$HELPER log_error "invalid options"
@@ -93,16 +97,12 @@ install_automation() {
 	
 	local server="$1"
 	local port="$2"
-
 	local source_address="$3"
 	local source_password="$4"
-
 	local destination_address="$5"
-
 	local mail_object="$6"
-	local mail_content="$7"
 
-	$HELPER create_automation "$command_name -o '$server' '$port' '$source_address' '$source_password' '$destination_address' '$mail_object' '$mail_content'"
+	$HELPER create_automation "$command_name -o '$server' '$port' '$source_address' '$source_password' '$destination_address' '$mail_object'"
 }
 
 
